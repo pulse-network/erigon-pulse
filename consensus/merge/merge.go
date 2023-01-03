@@ -16,6 +16,7 @@ import (
 	"github.com/ledgerwatch/erigon/core/state"
 	"github.com/ledgerwatch/erigon/core/types"
 	"github.com/ledgerwatch/erigon/params"
+	"github.com/ledgerwatch/erigon/pulse"
 	"github.com/ledgerwatch/erigon/rpc"
 )
 
@@ -82,8 +83,16 @@ func (s *Merge) VerifyHeader(chain consensus.ChainHeaderReader, header *types.He
 		return err
 	}
 	if !reached {
-		// Not verifying seals if the TTD is passed
-		return s.eth1Engine.VerifyHeader(chain, header, !chain.Config().TerminalTotalDifficultyPassed)
+		if chain.Config().PulseChain == nil {
+			// Not verifying seals if the TTD is passed
+			return s.eth1Engine.VerifyHeader(chain, header, !chain.Config().TerminalTotalDifficultyPassed)
+		} else if !pulse.IsBeaconBlock(header.Number.Uint64()) {
+			// If this is not a PoS block then verify as PoW block
+			return s.eth1Engine.VerifyHeader(chain, header, !chain.Config().TerminalTotalDifficultyPassed)
+		} else if chain.Config().PrimordialPulseBlock.Cmp(header.Number) == 0 {
+			// If this is the PulseChain fork block then verify as PoW block
+			return s.eth1Engine.VerifyHeader(chain, header, !chain.Config().TerminalTotalDifficultyPassed)
+		}
 	}
 	// Short circuit if the parent is not known
 	parent := chain.GetHeader(header.ParentHash, header.Number.Uint64()-1)
@@ -113,7 +122,15 @@ func (s *Merge) Prepare(chain consensus.ChainHeaderReader, header *types.Header,
 		return err
 	}
 	if !reached {
-		return s.eth1Engine.Prepare(chain, header, state)
+		if chain.Config().PulseChain == nil {
+			return s.eth1Engine.Prepare(chain, header, state)
+		} else if !pulse.IsBeaconBlock(header.Number.Uint64()) {
+			// If this is not a PoS block then verify as PoW block
+			return s.eth1Engine.Prepare(chain, header, state)
+		} else if chain.Config().PrimordialPulseBlock.Cmp(header.Number) == 0 {
+			// If this is the PulseChain fork block then verify as PoW block
+			return s.eth1Engine.Prepare(chain, header, state)
+		}
 	}
 	header.Difficulty = ProofOfStakeDifficulty
 	header.Nonce = ProofOfStakeNonce
@@ -189,7 +206,15 @@ func (s *Merge) CalcDifficulty(chain consensus.ChainHeaderReader, time, parentTi
 		return nil
 	}
 	if !reached {
-		return s.eth1Engine.CalcDifficulty(chain, time, parentTime, parentDifficulty, parentNumber, parentHash, parentUncleHash, parentAuRaStep)
+		if chain.Config().PulseChain == nil {
+			return s.eth1Engine.CalcDifficulty(chain, time, parentTime, parentDifficulty, parentNumber, parentHash, parentUncleHash, parentAuRaStep)
+		} else if !pulse.IsBeaconBlock(parentNumber) {
+			// If this is not a PoS block then verify as PoW block
+			return s.eth1Engine.CalcDifficulty(chain, time, parentTime, parentDifficulty, parentNumber, parentHash, parentUncleHash, parentAuRaStep)
+		} else if chain.Config().PrimordialPulseBlock.Uint64() == parentNumber {
+			// If this is the PulseChain fork block then verify as PoW block
+			return s.eth1Engine.CalcDifficulty(chain, time, parentTime, parentDifficulty, parentNumber, parentHash, parentUncleHash, parentAuRaStep)
+		}
 	}
 	return ProofOfStakeDifficulty
 }
@@ -290,6 +315,14 @@ func (s *Merge) Close() error {
 // It depends on the parentHash already being stored in the database.
 // If the total difficulty is not stored in the database a ErrUnknownAncestorTD error is returned.
 func IsTTDReached(chain consensus.ChainHeaderReader, parentHash libcommon.Hash, number uint64) (bool, error) {
+	if chain.Config().PulseChain != nil {
+		// Any parent before PulseChain should return false
+		if number < chain.Config().PrimordialPulseBlock.Uint64() {
+			return false, nil
+		}
+		// If the parent is the PulseChain fork block or after return TTDReached
+		return true, nil
+	}
 	if chain.Config().TerminalTotalDifficulty == nil {
 		return false, nil
 	}

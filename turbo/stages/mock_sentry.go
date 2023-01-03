@@ -287,7 +287,8 @@ func MockWithEverything(tb testing.TB, gspec *types.Genesis, key *ecdsa.PrivateK
 		}
 		chainID, _ := uint256.FromBig(mock.ChainConfig.ChainID)
 		shanghaiTime := mock.ChainConfig.ShanghaiTime
-		mock.TxPool, err = txpool.New(newTxs, mock.DB, poolCfg, kvcache.NewDummy(), *chainID, shanghaiTime, logger)
+		isPulseChain := mock.ChainConfig.PulseChain != nil
+		mock.TxPool, err = txpool.New(newTxs, mock.DB, poolCfg, kvcache.NewDummy(), *chainID, shanghaiTime, logger, isPulseChain)
 		if err != nil {
 			tb.Fatal(err)
 		}
@@ -295,10 +296,10 @@ func MockWithEverything(tb testing.TB, gspec *types.Genesis, key *ecdsa.PrivateK
 
 		stateChangesClient := direct.NewStateDiffClientDirect(erigonGrpcServeer)
 
-		mock.TxPoolFetch = txpool.NewFetch(mock.Ctx, sentries, mock.TxPool, stateChangesClient, mock.DB, mock.txPoolDB, *chainID, logger)
+		mock.TxPoolFetch = txpool.NewFetch(mock.Ctx, sentries, mock.TxPool, stateChangesClient, mock.DB, mock.txPoolDB, *chainID, logger, isPulseChain)
 		mock.TxPoolFetch.SetWaitGroup(&mock.ReceiveWg)
 		mock.TxPoolSend = txpool.NewSend(mock.Ctx, sentries, mock.TxPool, logger)
-		mock.TxPoolGrpcServer = txpool.NewGrpcServer(mock.Ctx, mock.TxPool, mock.txPoolDB, *chainID, logger)
+		mock.TxPoolGrpcServer = txpool.NewGrpcServer(mock.Ctx, mock.TxPool, mock.txPoolDB, *chainID, logger, isPulseChain)
 
 		mock.TxPoolFetch.ConnectCore()
 		mock.StreamWg.Add(1)

@@ -834,7 +834,7 @@ func (s *RoSnapshots) PrintDebug() {
 	}
 }
 
-func buildIdx(ctx context.Context, sn snaptype.FileInfo, chainID uint256.Int, tmpDir string, p *background.Progress, lvl log.Lvl, logger log.Logger) error {
+func buildIdx(ctx context.Context, sn snaptype.FileInfo, chainID uint256.Int, tmpDir string, p *background.Progress, lvl log.Lvl, logger log.Logger, isPulseChain bool) error {
 	//_, fName := filepath.Split(sn.Path)
 	//log.Debug("[snapshots] build idx", "file", fName)
 	switch sn.T {
@@ -848,14 +848,14 @@ func buildIdx(ctx context.Context, sn snaptype.FileInfo, chainID uint256.Int, tm
 		}
 	case snaptype.Transactions:
 		dir, _ := filepath.Split(sn.Path)
-		if err := TransactionsIdx(ctx, chainID, sn.From, sn.To, dir, tmpDir, p, lvl, logger); err != nil {
+		if err := TransactionsIdx(ctx, chainID, sn.From, sn.To, dir, tmpDir, p, lvl, logger, isPulseChain); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func BuildMissedIndices(logPrefix string, ctx context.Context, dirs datadir.Dirs, chainID uint256.Int, workers int, logger log.Logger) error {
+func BuildMissedIndices(logPrefix string, ctx context.Context, dirs datadir.Dirs, chainID uint256.Int, workers int, logger log.Logger, isPulseChain bool) error {
 	dir, tmpDir := dirs.Snap, dirs.Tmp
 	//log.Log(lvl, "[snapshots] Build indices", "from", min)
 
@@ -882,7 +882,7 @@ func BuildMissedIndices(logPrefix string, ctx context.Context, dirs datadir.Dirs
 				p := &background.Progress{}
 				ps.Add(p)
 				defer ps.Delete(p)
-				return buildIdx(gCtx, sn, chainID, tmpDir, p, log.LvlInfo, logger)
+				return buildIdx(gCtx, sn, chainID, tmpDir, p, log.LvlInfo, logger, isPulseChain)
 			})
 		}
 	}
@@ -1091,6 +1091,7 @@ func (br *BlockRetire) RetireBlocks(ctx context.Context, blockFrom, blockTo uint
 	logger.Log(lvl, "[snapshots] Retire Blocks", "range", fmt.Sprintf("%dk-%dk", blockFrom/1000, blockTo/1000))
 	snapshots := br.snapshots()
 	firstTxNum := blockReader.(*BlockReader).FirstTxNumNotInSnapshots()
+	isPulseChain := chainConfig.PulseChain != nil
 
 	// in future we will do it in background
 	if err := DumpBlocks(ctx, blockFrom, blockTo, snaptype.Erigon2SegmentSize, tmpDir, snapshots.Dir(), firstTxNum, db, workers, lvl, logger, blockReader); err != nil {
@@ -1103,7 +1104,7 @@ func (br *BlockRetire) RetireBlocks(ctx context.Context, blockFrom, blockTo uint
 	if notifier != nil && !reflect.ValueOf(notifier).IsNil() { // notify about new snapshots of any size
 		notifier.OnNewSnapshot()
 	}
-	merger := NewMerger(tmpDir, workers, lvl, *chainID, notifier, logger)
+	merger := NewMerger(tmpDir, workers, lvl, *chainID, notifier, logger, isPulseChain)
 	rangesToMerge := merger.FindMergeRanges(snapshots.Ranges())
 	if len(rangesToMerge) == 0 {
 		return nil
@@ -1189,7 +1190,8 @@ func (br *BlockRetire) BuildMissedIndicesIfNeed(ctx context.Context, logPrefix s
 		if snapshots.IndicesMax() < snapshots.SegmentsMax() {
 			chainID, _ := uint256.FromBig(cc.ChainID)
 			indexWorkers := estimate.IndexSnapshot.Workers()
-			if err := BuildMissedIndices(logPrefix, ctx, br.dirs, *chainID, indexWorkers, br.logger); err != nil {
+			isPulseChain := cc.PulseChain != nil
+			if err := BuildMissedIndices(logPrefix, ctx, br.dirs, *chainID, indexWorkers, br.logger, isPulseChain); err != nil {
 				return fmt.Errorf("BuildMissedIndices: %w", err)
 			}
 		}
@@ -1220,6 +1222,8 @@ func DumpBlocks(ctx context.Context, blockFrom, blockTo, blocksPerFile uint64, t
 func dumpBlocksRange(ctx context.Context, blockFrom, blockTo uint64, tmpDir, snapDir string, firstTxNum uint64, chainDB kv.RoDB, chainConfig chain.Config, workers int, lvl log.Lvl, logger log.Logger, blockReader services.FullBlockReader) error {
 	chainId, _ := uint256.FromBig(chainConfig.ChainID)
 	logEvery := time.NewTicker(20 * time.Second)
+	isPulseChain := chainConfig.PulseChain != nil
+
 	defer logEvery.Stop()
 
 	{
@@ -1241,7 +1245,7 @@ func dumpBlocksRange(ctx context.Context, blockFrom, blockTo uint64, tmpDir, sna
 		}
 
 		p := &background.Progress{}
-		if err := buildIdx(ctx, f, *chainId, tmpDir, p, lvl, logger); err != nil {
+		if err := buildIdx(ctx, f, *chainId, tmpDir, p, lvl, logger, isPulseChain); err != nil {
 			return err
 		}
 	}
@@ -1265,7 +1269,7 @@ func dumpBlocksRange(ctx context.Context, blockFrom, blockTo uint64, tmpDir, sna
 		}
 
 		p := &background.Progress{}
-		if err := buildIdx(ctx, f, *chainId, tmpDir, p, lvl, logger); err != nil {
+		if err := buildIdx(ctx, f, *chainId, tmpDir, p, lvl, logger, isPulseChain); err != nil {
 			return err
 		}
 	}
@@ -1305,7 +1309,7 @@ func dumpBlocksRange(ctx context.Context, blockFrom, blockTo uint64, tmpDir, sna
 		}
 
 		p := &background.Progress{}
-		if err := buildIdx(ctx, f, *chainId, tmpDir, p, lvl, logger); err != nil {
+		if err := buildIdx(ctx, f, *chainId, tmpDir, p, lvl, logger, isPulseChain); err != nil {
 			return err
 		}
 	}
@@ -1380,9 +1384,10 @@ func DumpTxs(ctx context.Context, db kv.RoDB, blockFrom, blockTo uint64, chainCo
 	defer cancel()
 
 	chainID, _ := uint256.FromBig(chainConfig.ChainID)
+	isPulseChain := chainConfig.PulseChain != nil
 
 	numBuf := make([]byte, 8)
-	parseCtx := types2.NewTxParseContext(*chainID)
+	parseCtx := types2.NewTxParseContext(*chainID, isPulseChain)
 	parseCtx.WithSender(false)
 	slot := types2.TxSlot{}
 	var sender [20]byte
@@ -1663,7 +1668,7 @@ func txsAmountBasedOnBodiesSnapshots(snapDir string, blockFrom, blockTo uint64) 
 	return
 }
 
-func TransactionsIdx(ctx context.Context, chainID uint256.Int, blockFrom, blockTo uint64, snapDir string, tmpDir string, p *background.Progress, lvl log.Lvl, logger log.Logger) (err error) {
+func TransactionsIdx(ctx context.Context, chainID uint256.Int, blockFrom, blockTo uint64, snapDir string, tmpDir string, p *background.Progress, lvl log.Lvl, logger log.Logger, isPulseChain bool) (err error) {
 	defer func() {
 		if rec := recover(); rec != nil {
 			err = fmt.Errorf("TransactionsIdx: at=%d-%d, %v, %s", blockFrom, blockTo, rec, dbg.Stack())
@@ -1723,7 +1728,7 @@ func TransactionsIdx(ctx context.Context, chainID uint256.Int, blockFrom, blockT
 	txnHashIdx.LogLvl(log.LvlDebug)
 	txnHash2BlockNumIdx.LogLvl(log.LvlDebug)
 
-	parseCtx := types2.NewTxParseContext(chainID)
+	parseCtx := types2.NewTxParseContext(chainID, isPulseChain)
 	parseCtx.WithSender(false)
 	slot := types2.TxSlot{}
 	bodyBuf, word := make([]byte, 0, 4096), make([]byte, 0, 4096)
@@ -1969,10 +1974,11 @@ type Merger struct {
 	chainID         uint256.Int
 	notifier        services.DBEventNotifier
 	logger          log.Logger
+	isPulseChain    bool
 }
 
-func NewMerger(tmpDir string, compressWorkers int, lvl log.Lvl, chainID uint256.Int, notifier services.DBEventNotifier, logger log.Logger) *Merger {
-	return &Merger{tmpDir: tmpDir, compressWorkers: compressWorkers, lvl: lvl, chainID: chainID, notifier: notifier, logger: logger}
+func NewMerger(tmpDir string, compressWorkers int, lvl log.Lvl, chainID uint256.Int, notifier services.DBEventNotifier, logger log.Logger, isPulseChain bool) *Merger {
+	return &Merger{tmpDir: tmpDir, compressWorkers: compressWorkers, lvl: lvl, chainID: chainID, notifier: notifier, logger: logger, isPulseChain: isPulseChain}
 }
 
 type Range struct {
@@ -2105,7 +2111,7 @@ func (m *Merger) Merge(ctx context.Context, snapshots *RoSnapshots, mergeRanges 
 			}
 			if doIndex {
 				p := &background.Progress{}
-				if err := buildIdx(ctx, f, m.chainID, m.tmpDir, p, m.lvl, m.logger); err != nil {
+				if err := buildIdx(ctx, f, m.chainID, m.tmpDir, p, m.lvl, m.logger, m.isPulseChain); err != nil {
 					return err
 				}
 			}

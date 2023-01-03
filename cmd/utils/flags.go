@@ -94,7 +94,7 @@ var (
 	}
 	ChainFlag = cli.StringFlag{
 		Name:  "chain",
-		Usage: "Name of the testnet to join",
+		Usage: "Name of the network to join",
 		Value: networkname.MainnetChainName,
 	}
 	IdentityFlag = cli.StringFlag{
@@ -906,6 +906,7 @@ func NewP2PConfig(
 	protocol uint,
 	allowedPorts []uint,
 	metricsEnabled bool,
+	chainName string,
 ) (*p2p.Config, error) {
 	var enodeDBPath string
 	switch protocol {
@@ -936,6 +937,7 @@ func NewP2PConfig(
 		AllowedPorts:    allowedPorts,
 		TmpDir:          dirs.Tmp,
 		MetricsEnabled:  metricsEnabled,
+		ChainName:       chainName,
 	}
 	if netRestrict != "" {
 		cfg.NetRestrict = new(netutil.Netlist)
@@ -1585,7 +1587,7 @@ func SetDNSDiscoveryDefaults(cfg *ethconfig.Config, genesis libcommon.Hash) {
 		return // already set through flags/config
 	}
 	protocol := "all"
-	if url := params.KnownDNSNetwork(genesis, protocol); url != "" {
+	if url := params.KnownDNSNetwork(genesis, cfg.NetworkID, protocol); url != "" {
 		cfg.EthDiscoveryURLs = []string{url}
 	}
 }

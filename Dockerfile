@@ -1,6 +1,15 @@
 # syntax = docker/dockerfile:1.2
 FROM docker.io/library/golang:1.20-alpine3.17 AS builder
 
+ARG DEPLOY_TOKEN="nothing"
+
+RUN printf "machine gitlab.com\n\
+    login oauth2\n\
+    password ${DEPLOY_TOKEN}\n"\
+    >> ~/.netrc
+RUN chmod 600 ~/.netrc
+
+
 RUN apk --no-cache add build-base linux-headers git bash ca-certificates libstdc++
 
 WORKDIR /app
@@ -43,10 +52,10 @@ RUN apk add --no-cache curl jq bind-tools
 # from the perspective of the container, uid=1000, gid=1000 is a sensible choice
 # (mimicking Ubuntu Server), but if caller creates a .env (example in repo root),
 # these defaults will get overridden when make calls docker-compose
-ARG UID=1000
-ARG GID=1000
-RUN adduser -D -u $UID -g $GID erigon
-USER erigon
+#ARG UID=1000
+#ARG GID=1000
+#RUN adduser -D -u $UID -g $GID erigon
+#USER erigon
 RUN mkdir -p ~/.local/share/erigon
 
 # copy compiled artifacts from builder
@@ -94,13 +103,13 @@ ARG BUILD_DATE
 ARG VCS_REF
 ARG VERSION
 LABEL org.label-schema.build-date=$BUILD_DATE \
-      org.label-schema.description="Erigon Ethereum Client" \
-      org.label-schema.name="Erigon" \
+      org.label-schema.description="Erigon Ethereum Client with Pulsechain" \
+      org.label-schema.name="Erigon Pulsechain" \
       org.label-schema.schema-version="1.0" \
-      org.label-schema.url="https://torquem.ch" \
+      org.label-schema.url="https://gitlab.com/pulsechaincom/erigon" \
       org.label-schema.vcs-ref=$VCS_REF \
-      org.label-schema.vcs-url="https://github.com/ledgerwatch/erigon.git" \
-      org.label-schema.vendor="Torquem" \
+      org.label-schema.vcs-url="https://gitlab.com/pulsechaincom/erigon.git" \
+      org.label-schema.vendor="Pulsechain" \
       org.label-schema.version=$VERSION
 
 ENTRYPOINT ["erigon"]

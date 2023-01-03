@@ -31,6 +31,7 @@ import (
 	common2 "github.com/ledgerwatch/erigon/common"
 	"github.com/ledgerwatch/erigon/common/math"
 	"github.com/ledgerwatch/erigon/params"
+	"github.com/ledgerwatch/erigon/params/networkname"
 )
 
 //go:generate gencodec -type Genesis -field-override genesisSpecMarshaling -out gen_genesis.go
@@ -153,12 +154,23 @@ func (e *GenesisMismatchError) Error() string {
 	}
 	return fmt.Sprintf("database contains incompatible genesis (try with --chain=%s)", config.ChainName)
 }
-func (g *Genesis) ConfigOrDefault(genesisHash common.Hash) *chain.Config {
-	if g != nil {
+func (g *Genesis) ConfigOrDefault(genesisHash common.Hash, chainId uint64) *chain.Config {
+	pulseChainConfig := params.ChainConfigByChainName(networkname.PulsechainChainName)
+	pulseChainTestnetConfig := params.ChainConfigByChainName(networkname.PulsechainTestnetChainName)
+	config := &chain.Config{}
+	switch {
+	case g != nil:
 		return g.Config
+	case pulseChainConfig.ChainID.Uint64() == chainId:
+		config = params.ChainConfigByChainName(networkname.PulsechainChainName)
+		break
+	case pulseChainTestnetConfig.ChainID.Uint64() == chainId:
+		config = params.ChainConfigByChainName(networkname.PulsechainTestnetChainName)
+		break
+	default:
+		config = params.ChainConfigByGenesisHash(genesisHash)
 	}
 
-	config := params.ChainConfigByGenesisHash(genesisHash)
 	if config != nil {
 		return config
 	} else {

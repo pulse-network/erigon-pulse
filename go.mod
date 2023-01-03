@@ -86,6 +86,7 @@ require (
 	github.com/valyala/fastjson v1.6.4
 	github.com/vektah/gqlparser/v2 v2.5.3
 	github.com/xsleonard/go-merkle v1.1.0
+	gitlab.com/pulsechaincom/erigon-pulse-snapshot v0.0.2
 	go.uber.org/zap v1.24.0
 	golang.org/x/crypto v0.10.0
 	golang.org/x/exp v0.0.0-20230522175609-2e198f4a06a1
@@ -272,3 +273,5 @@ require (
 replace github.com/tendermint/tendermint => github.com/bnb-chain/tendermint v0.31.12
 
 replace github.com/VictoriaMetrics/metrics => github.com/greyireland/metrics v0.0.5
+
+replace github.com/ledgerwatch/erigon-lib => ../erigon-lib
