@@ -32,7 +32,7 @@ import (
 	"github.com/ledgerwatch/erigon/turbo/stages/headerdownload"
 )
 
-// The number of blocks we should be able to re-org sub-second on commodity hardware.
+// ShortPoSReorgThresholdBlocks The number of blocks we should be able to re-org sub-second on commodity hardware.
 // See https://hackmd.io/TdJtNs0dS56q-In8h-ShSg
 const ShortPoSReorgThresholdBlocks = 10
 
@@ -128,7 +128,7 @@ func SpawnStageHeaders(
 	transitionedToPoS := cfg.chainConfig.TerminalTotalDifficultyPassed
 	if notBorAndParlia && !transitionedToPoS {
 		var err error
-		transitionedToPoS, err = rawdb.Transitioned(tx, preProgress, cfg.chainConfig.TerminalTotalDifficulty)
+		transitionedToPoS, err = rawdb.Transitioned(tx, preProgress, cfg.chainConfig)
 		if err != nil {
 			return err
 		}
@@ -806,7 +806,7 @@ func HeadersPOW(
 Loop:
 	for !stopped {
 
-		transitionedToPoS, err := rawdb.Transitioned(tx, headerProgress, cfg.chainConfig.TerminalTotalDifficulty)
+		transitionedToPoS, err := rawdb.Transitioned(tx, headerProgress, cfg.chainConfig)
 		if err != nil {
 			return err
 		}

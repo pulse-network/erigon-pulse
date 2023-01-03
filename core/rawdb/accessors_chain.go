@@ -22,6 +22,7 @@ import (
 	"encoding/binary"
 	"encoding/json"
 	"fmt"
+	"github.com/ledgerwatch/erigon-lib/chain"
 	"math"
 	"math/big"
 	"time"
@@ -1624,7 +1625,17 @@ func WritePendingEpoch(tx kv.RwTx, blockNum uint64, blockHash libcommon.Hash, tr
 }
 
 // Transitioned returns true if the block number comes after POS transition or is the last POW block
-func Transitioned(db kv.Getter, blockNum uint64, terminalTotalDifficulty *big.Int) (trans bool, err error) {
+func Transitioned(db kv.Getter, blockNum uint64, chain chain.Config) (trans bool, err error) {
+	terminalTotalDifficulty := chain.TerminalTotalDifficulty
+
+	if chain.PulseChain != nil {
+		if blockNum >= chain.PrimordialPulseBlock.Uint64() {
+			return true, nil
+		}
+
+		return false, nil
+	}
+
 	if terminalTotalDifficulty == nil {
 		return false, nil
 	}
