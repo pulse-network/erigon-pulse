@@ -148,8 +148,9 @@ func DownloadAndIndexSnapshotsIfNeed(s *StageState, ctx context.Context, tx kv.R
 			// wait for Downloader service to download all expected snapshots
 			if cfg.snapshots.IndicesMax() < cfg.snapshots.SegmentsMax() {
 				chainID, _ := uint256.FromBig(cfg.chainConfig.ChainID)
+				isPulseChain := cfg.chainConfig.PulseChain != nil
 				indexWorkers := estimate.IndexSnapshot.Workers()
-				if err := snapshotsync.BuildMissedIndices(s.LogPrefix(), ctx, cfg.dirs, *chainID, indexWorkers); err != nil {
+				if err := snapshotsync.BuildMissedIndices(s.LogPrefix(), ctx, cfg.dirs, *chainID, indexWorkers, isPulseChain); err != nil {
 					return fmt.Errorf("BuildMissedIndices: %w", err)
 				}
 			}

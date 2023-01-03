@@ -31,15 +31,19 @@ var (
 
 // see https://calver.org
 const (
-	VersionMajor       = 2        // Major version component of the current release
-	VersionMinor       = 42       // Minor version component of the current release
-	VersionMicro       = 0        // Patch version component of the current release
-	VersionModifier    = "stable" // Modifier component of the current release
+	VersionMajor       = 2            // Major version component of the current release
+	VersionMinor       = 42           // Minor version component of the current release
+	VersionMicro       = 0            // Patch version component of the current release
+	VersionModifier    = "stable"     // Modifier component of the current release
+	VariantMeta        = "pulsechain" // Variant metadata to append to the version string
 	VersionKeyCreated  = "ErigonVersionCreated"
 	VersionKeyFinished = "ErigonVersionFinished"
 )
 
 func withModifier(vsn string) string {
+	if VariantMeta != "" {
+		vsn += "-" + VariantMeta
+	}
 	if !isStable() {
 		vsn += "-" + VersionModifier
 	}

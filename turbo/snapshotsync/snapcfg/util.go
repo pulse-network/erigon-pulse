@@ -7,29 +7,35 @@ import (
 	"strings"
 
 	snapshothashes "github.com/ledgerwatch/erigon-snapshot"
-	"github.com/ledgerwatch/erigon/params/networkname"
 	"github.com/pelletier/go-toml/v2"
+	pulseSnapshotHashes "gitlab.com/pulsechaincom/erigon-pulse-snapshot"
 	"golang.org/x/exp/slices"
+
+	"github.com/ledgerwatch/erigon/params/networkname"
 )
 
 var (
-	Mainnet    = fromToml(snapshothashes.Mainnet)
-	Sepolia    = fromToml(snapshothashes.Sepolia)
-	Goerli     = fromToml(snapshothashes.Goerli)
-	Bsc        = fromToml(snapshothashes.Bsc)
-	Mumbai     = fromToml(snapshothashes.Mumbai)
-	BorMainnet = fromToml(snapshothashes.BorMainnet)
-	Gnosis     = fromToml(snapshothashes.Gnosis)
-	Chiado     = fromToml(snapshothashes.Chiado)
+	Mainnet           = fromToml(snapshothashes.Mainnet)
+	Sepolia           = fromToml(snapshothashes.Sepolia)
+	Goerli            = fromToml(snapshothashes.Goerli)
+	Bsc               = fromToml(snapshothashes.Bsc)
+	Mumbai            = fromToml(snapshothashes.Mumbai)
+	BorMainnet        = fromToml(snapshothashes.BorMainnet)
+	Gnosis            = fromToml(snapshothashes.Gnosis)
+	Chiado            = fromToml(snapshothashes.Chiado)
+	PulseChainMainnet = fromToml(pulseSnapshotHashes.PulseChainMainnet)
+	PulseChainTestnet = fromToml(snapshothashes.Mainnet)
 
-	MainnetHistory    = fromToml(snapshothashes.MainnetHistory)
-	SepoliaHistory    = fromToml(snapshothashes.SepoliaHistory)
-	GoerliHistory     = fromToml(snapshothashes.GoerliHistory)
-	BscHistory        = fromToml(snapshothashes.BscHistory)
-	MumbaiHistory     = fromToml(snapshothashes.MumbaiHistory)
-	BorMainnetHistory = fromToml(snapshothashes.BorMainnetHistory)
-	GnosisHistory     = fromToml(snapshothashes.GnosisHistory)
-	ChiadoHistory     = fromToml(snapshothashes.ChiadoHistory)
+	MainnetHistory           = fromToml(snapshothashes.MainnetHistory)
+	SepoliaHistory           = fromToml(snapshothashes.SepoliaHistory)
+	GoerliHistory            = fromToml(snapshothashes.GoerliHistory)
+	BscHistory               = fromToml(snapshothashes.BscHistory)
+	MumbaiHistory            = fromToml(snapshothashes.MumbaiHistory)
+	BorMainnetHistory        = fromToml(snapshothashes.BorMainnetHistory)
+	GnosisHistory            = fromToml(snapshothashes.GnosisHistory)
+	ChiadoHistory            = fromToml(snapshothashes.ChiadoHistory)
+	PulseChainMainnetHistory = fromToml(pulseSnapshotHashes.PulseChainMainnetHistory)
+	PulseChainTestnetHistory = fromToml(snapshothashes.MainnetHistory)
 )
 
 type PreverifiedItem struct {
@@ -56,14 +62,16 @@ func doSort(in preverified) Preverified {
 }
 
 var (
-	MainnetChainSnapshotCfg    = newCfg(Mainnet, MainnetHistory)
-	SepoliaChainSnapshotCfg    = newCfg(Sepolia, SepoliaHistory)
-	GoerliChainSnapshotCfg     = newCfg(Goerli, GoerliHistory)
-	BscChainSnapshotCfg        = newCfg(Bsc, BscHistory)
-	MumbaiChainSnapshotCfg     = newCfg(Mumbai, MumbaiHistory)
-	BorMainnetChainSnapshotCfg = newCfg(BorMainnet, BorMainnetHistory)
-	GnosisChainSnapshotCfg     = newCfg(Gnosis, GnosisHistory)
-	ChiadoChainSnapshotCfg     = newCfg(Chiado, ChiadoHistory)
+	MainnetChainSnapshotCfg           = newCfg(Mainnet, MainnetHistory)
+	SepoliaChainSnapshotCfg           = newCfg(Sepolia, SepoliaHistory)
+	GoerliChainSnapshotCfg            = newCfg(Goerli, GoerliHistory)
+	BscChainSnapshotCfg               = newCfg(Bsc, BscHistory)
+	MumbaiChainSnapshotCfg            = newCfg(Mumbai, MumbaiHistory)
+	BorMainnetChainSnapshotCfg        = newCfg(BorMainnet, BorMainnetHistory)
+	GnosisChainSnapshotCfg            = newCfg(Gnosis, GnosisHistory)
+	ChiadoChainSnapshotCfg            = newCfg(Chiado, ChiadoHistory)
+	PulseChainMainnetChainSnapshotCfg = newCfg(PulseChainMainnet, PulseChainMainnetHistory)
+	PulseChainTestnetChainSnapshotCfg = newCfg(PulseChainTestnet, PulseChainTestnetHistory)
 )
 
 func newCfg(preverified, preverifiedHistory Preverified) *Cfg {
@@ -107,14 +115,16 @@ type Cfg struct {
 }
 
 var KnownCfgs = map[string]*Cfg{
-	networkname.MainnetChainName:    MainnetChainSnapshotCfg,
-	networkname.SepoliaChainName:    SepoliaChainSnapshotCfg,
-	networkname.GoerliChainName:     GoerliChainSnapshotCfg,
-	networkname.BSCChainName:        BscChainSnapshotCfg,
-	networkname.MumbaiChainName:     MumbaiChainSnapshotCfg,
-	networkname.BorMainnetChainName: BorMainnetChainSnapshotCfg,
-	networkname.GnosisChainName:     GnosisChainSnapshotCfg,
-	networkname.ChiadoChainName:     ChiadoChainSnapshotCfg,
+	networkname.MainnetChainName:           MainnetChainSnapshotCfg,
+	networkname.SepoliaChainName:           SepoliaChainSnapshotCfg,
+	networkname.GoerliChainName:            GoerliChainSnapshotCfg,
+	networkname.BSCChainName:               BscChainSnapshotCfg,
+	networkname.MumbaiChainName:            MumbaiChainSnapshotCfg,
+	networkname.BorMainnetChainName:        BorMainnetChainSnapshotCfg,
+	networkname.GnosisChainName:            GnosisChainSnapshotCfg,
+	networkname.ChiadoChainName:            ChiadoChainSnapshotCfg,
+	networkname.PulsechainChainName:        PulseChainMainnetChainSnapshotCfg,
+	networkname.PulsechainTestnetChainName: PulseChainTestnetChainSnapshotCfg,
 }
 
 // KnownCfg return list of preverified hashes for given network, but apply whiteList filter if it's not empty

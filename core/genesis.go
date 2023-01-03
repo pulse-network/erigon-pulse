@@ -249,6 +249,13 @@ func WriteGenesisBlock(db kv.RwTx, genesis *Genesis, overrideShanghaiTime *big.I
 		}
 		return genesis.Config, block, nil
 	}
+	// Assume mainnet chainId first
+	chainId := params.MainnetChainConfig.ChainID.Uint64()
+	// Note: The `genesis` argument will be one of:
+	// - nil: if running without the `init` command and without providing a chain flag (pulsechain, ropsten, etc..)
+	// - defaulted: when a chain flag is provided (pulsechain, ropsten, etc..), genesis will hold the defaults
+	// - custom: if running with the `init` command supplying a custom genesis.json file, genesis will hold the file contents
+	// Check whether the genesis block is already written.
 
 	// Check whether the genesis block is already written.
 	if genesis != nil {
@@ -256,6 +263,7 @@ func WriteGenesisBlock(db kv.RwTx, genesis *Genesis, overrideShanghaiTime *big.I
 		if err1 != nil {
 			return genesis.Config, nil, err1
 		}
+		chainId = genesis.Config.ChainID.Uint64()
 		hash := block.Hash()
 		if hash != storedHash {
 			return genesis.Config, block, &GenesisMismatchError{storedHash, hash}
@@ -266,7 +274,7 @@ func WriteGenesisBlock(db kv.RwTx, genesis *Genesis, overrideShanghaiTime *big.I
 		return genesis.Config, nil, err
 	}
 	// Get the existing chain configuration.
-	newCfg := genesis.configOrDefault(storedHash)
+	newCfg := genesis.configOrDefault(storedHash, chainId)
 	applyOverrides(newCfg)
 	if err := newCfg.CheckConfigForkOrder(); err != nil {
 		return newCfg, nil, err
@@ -286,7 +294,10 @@ func WriteGenesisBlock(db kv.RwTx, genesis *Genesis, overrideShanghaiTime *big.I
 	// Special case: don't change the existing config of a private chain if no new
 	// config is supplied. This is useful, for example, to preserve DB config created by erigon init.
 	// In that case, only apply the overrides.
-	if genesis == nil && params.ChainConfigByGenesisHash(storedHash) == nil {
+	// Added: support custom config for PrimordialPulse fork with mainnet genesis
+	// and non-standard chain id.
+	if genesis == nil && (storedCfg.PrimordialPulseBlock != nil ||
+		params.ChainConfigByGenesisHash(storedHash) == nil) {
 		newCfg = storedCfg
 		applyOverrides(newCfg)
 	}
@@ -305,12 +316,23 @@ func WriteGenesisBlock(db kv.RwTx, genesis *Genesis, overrideShanghaiTime *big.I
 	return newCfg, storedBlock, nil
 }
 
-func (g *Genesis) configOrDefault(genesisHash libcommon.Hash) *chain.Config {
-	if g != nil {
+func (g *Genesis) configOrDefault(genesisHash libcommon.Hash, chainId uint64) *chain.Config {
+	pulseChainConfig := params.ChainConfigByChainName(networkname.PulsechainChainName)
+	pulseChainTestnetConfig := params.ChainConfigByChainName(networkname.PulsechainTestnetChainName)
+	config := &chain.Config{}
+	switch {
+	case g != nil:
 		return g.Config
+	case pulseChainConfig.ChainID.Uint64() == chainId:
+		config = params.ChainConfigByChainName(networkname.PulsechainChainName)
+		break
+	case pulseChainTestnetConfig.ChainID.Uint64() == chainId:
+		config = params.ChainConfigByChainName(networkname.PulsechainTestnetChainName)
+		break
+	default:
+		config = params.ChainConfigByGenesisHash(genesisHash)
 	}
 
-	config := params.ChainConfigByGenesisHash(genesisHash)
 	if config != nil {
 		return config
 	} else {
@@ -763,6 +785,28 @@ func DefaultChiadoGenesisBlock() *Genesis {
 	}
 }
 
+func DefaultPulsechainGenesisBlock() *Genesis {
+	return &Genesis{
+		Config:     params.PulsechainChainConfig,
+		Nonce:      66,
+		ExtraData:  hexutil.MustDecode("0x11bbe8db4e347b4e8c937c1c8370e4b5ed33adb3db69cbdb7a38e1e50b1b82fa"),
+		GasLimit:   5000,
+		Difficulty: big.NewInt(17179869184),
+		Alloc:      readPrealloc("allocs/mainnet.json"),
+	}
+}
+
+func DefaultPulsechainTestnetGenesisBlock() *Genesis {
+	return &Genesis{
+		Config:     params.PulsechainTestnetChainConfig,
+		Nonce:      66,
+		ExtraData:  hexutil.MustDecode("0x11bbe8db4e347b4e8c937c1c8370e4b5ed33adb3db69cbdb7a38e1e50b1b82fa"),
+		GasLimit:   5000,
+		Difficulty: big.NewInt(17179869184),
+		Alloc:      readPrealloc("allocs/mainnet.json"),
+	}
+}
+
 // Pre-calculated version of:
 //
 //	DevnetSignPrivateKey = crypto.HexToECDSA(sha256.Sum256([]byte("erigon devnet key")))
@@ -829,6 +873,10 @@ func DefaultGenesisBlockByChainName(chain string) *Genesis {
 		return DefaultGnosisGenesisBlock()
 	case networkname.ChiadoChainName:
 		return DefaultChiadoGenesisBlock()
+	case networkname.PulsechainChainName:
+		return DefaultPulsechainGenesisBlock()
+	case networkname.PulsechainTestnetChainName:
+		return DefaultPulsechainTestnetGenesisBlock()
 	default:
 		return nil
 	}
