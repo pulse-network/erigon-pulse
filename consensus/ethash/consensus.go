@@ -565,7 +565,7 @@ func (ethash *Ethash) Finalize(config *chain.Config, header *types.Header, state
 	e consensus.EpochReader, chain consensus.ChainHeaderReader, syscall consensus.SystemCall,
 ) (types.Transactions, types.Receipts, error) {
 	// Apply fork changes on PrimordialPulse block
-	if cfg := chain.Config(); cfg.PulseChain != nil && cfg.PrimordialPulseBlock.Uint64() == header.Number.Uint64() {
+	if cfg := chain.Config(); cfg.IsPrimordialPulseBlock(header.Number.Uint64()) {
 		pulse.PrimordialPulseFork(state, cfg.PulseChain)
 	}
 
