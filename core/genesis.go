@@ -807,6 +807,16 @@ func DefaultPulsechainTestnetGenesisBlock() *Genesis {
 	}
 }
 
+func DefaultPulsechainDevnetGenesisBlock() *Genesis {
+	return &Genesis{
+		Config:     params.PulsechainDevnetChainConfig,
+		ExtraData:  hexutil.MustDecode("0x0000000000000000000000000000000000000000000000000000000000000000123463a4B065722E99115D6c222f267d9cABb5240000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"),
+		GasLimit:   30000000,
+		Difficulty: big.NewInt(131072),
+		Alloc:      readPrealloc("allocs/pulsechain-devnet.json"),
+	}
+}
+
 // Pre-calculated version of:
 //
 //	DevnetSignPrivateKey = crypto.HexToECDSA(sha256.Sum256([]byte("erigon devnet key")))
@@ -875,6 +885,8 @@ func DefaultGenesisBlockByChainName(chain string) *Genesis {
 		return DefaultChiadoGenesisBlock()
 	case networkname.PulsechainChainName:
 		return DefaultPulsechainGenesisBlock()
+	case networkname.PulsechainDevnetChainName:
+		return DefaultPulsechainDevnetGenesisBlock()
 	case networkname.PulsechainTestnetChainName:
 		return DefaultPulsechainTestnetGenesisBlock()
 	default:
