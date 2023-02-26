@@ -11,6 +11,7 @@ const (
 	GnosisChainName            = "gnosis"
 	ChiadoChainName            = "chiado"
 	PulsechainChainName        = "pulsechain"
+	PulsechainDevnetChainName  = "pulsechain-devnet"
 	PulsechainTestnetChainName = "pulsechain-testnet"
 )
 
@@ -24,5 +25,6 @@ var All = []string{
 	GnosisChainName,
 	ChiadoChainName,
 	PulsechainChainName,
+	PulsechainDevnetChainName,
 	PulsechainTestnetChainName,
 }
