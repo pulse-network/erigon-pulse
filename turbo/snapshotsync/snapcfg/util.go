@@ -24,7 +24,7 @@ var (
 	Gnosis            = fromToml(snapshothashes.Gnosis)
 	Chiado            = fromToml(snapshothashes.Chiado)
 	PulseChainMainnet = fromToml(pulseSnapshotHashes.PulseChainMainnet)
-	PulseChainTestnet = fromToml(snapshothashes.Mainnet)
+	PulseChainTestnet = fromToml(pulseSnapshotHashes.PulseChainTestnet)
 
 	MainnetHistory           = fromToml(snapshothashes.MainnetHistory)
 	SepoliaHistory           = fromToml(snapshothashes.SepoliaHistory)
@@ -35,7 +35,7 @@ var (
 	GnosisHistory            = fromToml(snapshothashes.GnosisHistory)
 	ChiadoHistory            = fromToml(snapshothashes.ChiadoHistory)
 	PulseChainMainnetHistory = fromToml(pulseSnapshotHashes.PulseChainMainnetHistory)
-	PulseChainTestnetHistory = fromToml(snapshothashes.MainnetHistory)
+	PulseChainTestnetHistory = fromToml(pulseSnapshotHashes.PulseChainTestnetHistory)
 )
 
 type PreverifiedItem struct {
