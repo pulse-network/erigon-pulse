@@ -167,6 +167,9 @@ type Config struct {
 	// Log is a custom logger to use with the p2p.Server.
 	Log log.Logger `toml:",omitempty"`
 
+	// ChainName is the name of the chain config
+	ChainName string `toml:",omitempty"`
+
 	// it is actually used but a linter got confused
 	clock mclock.Clock //nolint:structcheck
 
