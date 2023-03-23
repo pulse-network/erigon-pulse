@@ -949,8 +949,8 @@ github.com/yuin/goldmark v1.3.5/go.mod h1:mwnBkeHKe2W/ZEtQ+71ViKU8L12m81fl3OWwC1
 github.com/yuin/goldmark v1.4.13/go.mod h1:6yULJ656Px+3vBD8DxQVa3kxgyrAnzto9xy5taEt/CY=
 gitlab.com/pulsechaincom/erigon-lib v0.0.17 h1:CMelhQ/0QydhT8r9xsweXKS/NA9QEgWZ6QrJ0nxQVPg=
 gitlab.com/pulsechaincom/erigon-lib v0.0.17/go.mod h1:nyJqfX9uPm1P/poZB1211DFe5DnAKOhYqvkEPyW7dXM=
-gitlab.com/pulsechaincom/erigon-pulse-snapshot v0.0.2 h1:M/ReqIKALiW5a56bdT8w9j9GZA7yqSEhO9joesRsWBQ=
-gitlab.com/pulsechaincom/erigon-pulse-snapshot v0.0.2/go.mod h1:U/W4jVFkJQ1XeXul9ng2MFGYRV2bBqTxVjSEojtm18c=
+gitlab.com/pulsechaincom/erigon-pulse-snapshot v0.0.3 h1:jB55xBCttoM2mxD6PCYQxf/es0WuBePQYfU+VH4v+d8=
+gitlab.com/pulsechaincom/erigon-pulse-snapshot v0.0.3/go.mod h1:U/W4jVFkJQ1XeXul9ng2MFGYRV2bBqTxVjSEojtm18c=
 go.etcd.io/bbolt v1.3.3/go.mod h1:IbVyRI1SCnLcuJnV2u8VeU0CEYM7e686BmAb1XKL+uU=
 go.etcd.io/bbolt v1.3.6 h1:/ecaJf0sk1l4l6V4awd65v2C3ILy7MSj+s/x1ADCIMU=
 go.etcd.io/bbolt v1.3.6/go.mod h1:qXsaaIqmgQH0T+OPdb99Bf+PKfBBQVAdyD6TY9G8XM4=

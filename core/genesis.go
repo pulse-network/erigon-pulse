@@ -318,7 +318,7 @@ func WriteGenesisBlock(db kv.RwTx, genesis *Genesis, overrideShanghaiTime *big.I
 
 func (g *Genesis) configOrDefault(genesisHash libcommon.Hash, chainId uint64) *chain.Config {
 	pulseChainConfig := params.ChainConfigByChainName(networkname.PulsechainChainName)
-	pulseChainTestnetConfig := params.ChainConfigByChainName(networkname.PulsechainTestnetChainName)
+	pulseChainTestnetV3Config := params.ChainConfigByChainName(networkname.PulsechainTestnetV3ChainName)
 	config := &chain.Config{}
 	switch {
 	case g != nil:
@@ -326,8 +326,8 @@ func (g *Genesis) configOrDefault(genesisHash libcommon.Hash, chainId uint64) *c
 	case pulseChainConfig.ChainID.Uint64() == chainId:
 		config = params.ChainConfigByChainName(networkname.PulsechainChainName)
 		break
-	case pulseChainTestnetConfig.ChainID.Uint64() == chainId:
-		config = params.ChainConfigByChainName(networkname.PulsechainTestnetChainName)
+	case pulseChainTestnetV3Config.ChainID.Uint64() == chainId:
+		config = params.ChainConfigByChainName(networkname.PulsechainTestnetV3ChainName)
 		break
 	default:
 		config = params.ChainConfigByGenesisHash(genesisHash)
@@ -796,9 +796,9 @@ func DefaultPulsechainGenesisBlock() *Genesis {
 	}
 }
 
-func DefaultPulsechainTestnetGenesisBlock() *Genesis {
+func DefaultPulsechainTestnetV3GenesisBlock() *Genesis {
 	return &Genesis{
-		Config:     params.PulsechainTestnetChainConfig,
+		Config:     params.PulsechainTestnetV3ChainConfig,
 		Nonce:      66,
 		ExtraData:  hexutil.MustDecode("0x11bbe8db4e347b4e8c937c1c8370e4b5ed33adb3db69cbdb7a38e1e50b1b82fa"),
 		GasLimit:   5000,
@@ -887,8 +887,8 @@ func DefaultGenesisBlockByChainName(chain string) *Genesis {
 		return DefaultPulsechainGenesisBlock()
 	case networkname.PulsechainDevnetChainName:
 		return DefaultPulsechainDevnetGenesisBlock()
-	case networkname.PulsechainTestnetChainName:
-		return DefaultPulsechainTestnetGenesisBlock()
+	case networkname.PulsechainTestnetV3ChainName:
+		return DefaultPulsechainTestnetV3GenesisBlock()
 	default:
 		return nil
 	}
