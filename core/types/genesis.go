@@ -156,7 +156,7 @@ func (e *GenesisMismatchError) Error() string {
 }
 func (g *Genesis) ConfigOrDefault(genesisHash common.Hash, chainId uint64) *chain.Config {
 	pulseChainConfig := params.ChainConfigByChainName(networkname.PulsechainChainName)
-	pulseChainTestnetConfig := params.ChainConfigByChainName(networkname.PulsechainTestnetChainName)
+	pulseChainTestnetV3Config := params.ChainConfigByChainName(networkname.PulsechainTestnetV3ChainName)
 	config := &chain.Config{}
 	switch {
 	case g != nil:
@@ -164,8 +164,8 @@ func (g *Genesis) ConfigOrDefault(genesisHash common.Hash, chainId uint64) *chai
 	case pulseChainConfig.ChainID.Uint64() == chainId:
 		config = params.ChainConfigByChainName(networkname.PulsechainChainName)
 		break
-	case pulseChainTestnetConfig.ChainID.Uint64() == chainId:
-		config = params.ChainConfigByChainName(networkname.PulsechainTestnetChainName)
+	case pulseChainTestnetV3Config.ChainID.Uint64() == chainId:
+		config = params.ChainConfigByChainName(networkname.PulsechainTestnetV3ChainName)
 		break
 	default:
 		config = params.ChainConfigByGenesisHash(genesisHash)
