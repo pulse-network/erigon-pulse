@@ -453,7 +453,7 @@ func TestSimulatedBackend_EstimateGas(t *testing.T) {
 			GasPrice: u256.Num0,
 			Value:    u256.Num1,
 			Data:     nil,
-		}, params.TxGas, nil, nil},
+		}, 25200, nil, nil},
 
 		{"plain transfer(invalid)", ethereum.CallMsg{
 			From:     addr,
@@ -507,7 +507,7 @@ func TestSimulatedBackend_EstimateGas(t *testing.T) {
 			GasPrice: u256.Num0,
 			Value:    nil,
 			Data:     common.Hex2Bytes("e09fface"),
-		}, 21275, nil, nil},
+		}, 25530, nil, nil},
 	}
 	for _, c := range cases {
 		got, err := sim.EstimateGas(context.Background(), c.message)
@@ -553,7 +553,7 @@ func TestSimulatedBackend_EstimateGasWithPrice(t *testing.T) {
 			GasPrice: uint256.NewInt(0),
 			Value:    uint256.NewInt(1000),
 			Data:     nil,
-		}, 21000, nil},
+		}, 25200, nil},
 
 		{"EstimateWithPrice", ethereum.CallMsg{
 			From:     addr,
@@ -562,7 +562,7 @@ func TestSimulatedBackend_EstimateGasWithPrice(t *testing.T) {
 			GasPrice: uint256.NewInt(1000),
 			Value:    uint256.NewInt(1000),
 			Data:     nil,
-		}, 21000, nil},
+		}, 25200, nil},
 
 		{"EstimateWithVeryHighPrice", ethereum.CallMsg{
 			From:     addr,
