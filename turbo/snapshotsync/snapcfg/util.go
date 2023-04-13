@@ -23,7 +23,7 @@ var (
 	Gnosis              = fromToml(snapshothashes.Gnosis)
 	Chiado              = fromToml(snapshothashes.Chiado)
 	PulseChainMainnet   = fromToml(pulseSnapshotHashes.PulseChainMainnet)
-	PulseChainTestnetV3 = fromToml(pulseSnapshotHashes.PulseChainTestnetV3)
+	PulseChainTestnetV4 = fromToml(pulseSnapshotHashes.PulseChainTestnetV4)
 
 	MainnetHistory             = fromToml(snapshothashes.MainnetHistory)
 	SepoliaHistory             = fromToml(snapshothashes.SepoliaHistory)
@@ -33,7 +33,7 @@ var (
 	GnosisHistory              = fromToml(snapshothashes.GnosisHistory)
 	ChiadoHistory              = fromToml(snapshothashes.ChiadoHistory)
 	PulseChainMainnetHistory   = fromToml(pulseSnapshotHashes.PulseChainMainnetHistory)
-	PulseChainTestnetV3History = fromToml(pulseSnapshotHashes.PulseChainTestnetV3History)
+	PulseChainTestnetV4History = fromToml(pulseSnapshotHashes.PulseChainTestnetV4History)
 )
 
 type PreverifiedItem struct {
@@ -68,7 +68,7 @@ var (
 	GnosisChainSnapshotCfg              = newCfg(Gnosis, GnosisHistory)
 	ChiadoChainSnapshotCfg              = newCfg(Chiado, ChiadoHistory)
 	PulseChainMainnetChainSnapshotCfg   = newCfg(PulseChainMainnet, PulseChainMainnetHistory)
-	PulseChainTestnetV3ChainSnapshotCfg = newCfg(PulseChainTestnetV3, PulseChainTestnetV3History)
+	PulseChainTestnetV4ChainSnapshotCfg = newCfg(PulseChainTestnetV4, PulseChainTestnetV4History)
 )
 
 func newCfg(preverified, preverifiedHistory Preverified) *Cfg {
@@ -120,7 +120,7 @@ var KnownCfgs = map[string]*Cfg{
 	networkname.GnosisChainName:              GnosisChainSnapshotCfg,
 	networkname.ChiadoChainName:              ChiadoChainSnapshotCfg,
 	networkname.PulsechainChainName:          PulseChainMainnetChainSnapshotCfg,
-	networkname.PulsechainTestnetV3ChainName: PulseChainTestnetV3ChainSnapshotCfg,
+	networkname.PulsechainTestnetV4ChainName: PulseChainTestnetV4ChainSnapshotCfg,
 }
 
 // KnownCfg return list of preverified hashes for given network, but apply whiteList filter if it's not empty

@@ -135,7 +135,7 @@ var (
 
 	PulsechainDevnetChainConfig = readChainSpec("chainspecs/pulsechain-devnet.json")
 
-	PulsechainTestnetV3ChainConfig = readChainSpec("chainspecs/pulsechain-testnet-v3.json")
+	PulsechainTestnetV4ChainConfig = readChainSpec("chainspecs/pulsechain-testnet-v4.json")
 
 	CliqueSnapshot = NewSnapshotConfig(10, 1024, 16384, true, "")
 
@@ -221,8 +221,8 @@ func ChainConfigByChainName(chain string) *chain.Config {
 		return PulsechainChainConfig
 	case networkname.PulsechainDevnetChainName:
 		return PulsechainDevnetChainConfig
-	case networkname.PulsechainTestnetV3ChainName:
-		return PulsechainTestnetV3ChainConfig
+	case networkname.PulsechainTestnetV4ChainName:
+		return PulsechainTestnetV4ChainConfig
 	default:
 		return nil
 	}
@@ -250,7 +250,7 @@ func GenesisHashByChainName(chain string) *libcommon.Hash {
 		return &PulsechainGenesisHash
 	case networkname.PulsechainDevnetChainName:
 		return &PulsechainDevnetGenesisHash
-	case networkname.PulsechainTestnetV3ChainName:
+	case networkname.PulsechainTestnetV4ChainName:
 		return &PulsechainTetnetGenesisHash
 	default:
 		return nil
