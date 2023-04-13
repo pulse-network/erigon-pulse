@@ -17,7 +17,7 @@ const (
 	ChiadoChainName              = "chiado"
 	PulsechainChainName          = "pulsechain"
 	PulsechainDevnetChainName    = "pulsechain-devnet"
-	PulsechainTestnetV3ChainName = "pulsechain-testnet-v3"
+	PulsechainTestnetV4ChainName = "pulsechain-testnet-v4"
 )
 
 var All = []string{
@@ -36,5 +36,5 @@ var All = []string{
 	ChiadoChainName,
 	PulsechainChainName,
 	PulsechainDevnetChainName,
-	PulsechainTestnetV3ChainName,
+	PulsechainTestnetV4ChainName,
 }
