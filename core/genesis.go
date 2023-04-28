@@ -251,11 +251,6 @@ func WriteGenesisBlock(db kv.RwTx, genesis *Genesis, overrideShanghaiTime *big.I
 	}
 	// Assume mainnet chainId first
 	chainId := params.MainnetChainConfig.ChainID.Uint64()
-	// Note: The `genesis` argument will be one of:
-	// - nil: if running without the `init` command and without providing a chain flag (pulsechain, ropsten, etc..)
-	// - defaulted: when a chain flag is provided (pulsechain, ropsten, etc..), genesis will hold the defaults
-	// - custom: if running with the `init` command supplying a custom genesis.json file, genesis will hold the file contents
-	// Check whether the genesis block is already written.
 
 	// Check whether the genesis block is already written.
 	if genesis != nil {
@@ -263,6 +258,8 @@ func WriteGenesisBlock(db kv.RwTx, genesis *Genesis, overrideShanghaiTime *big.I
 		if err1 != nil {
 			return genesis.Config, nil, err1
 		}
+		// Use the incoming chainID for building chain config.
+		// Allows for mainnet genesis w/ pulsechain config.
 		chainId = genesis.Config.ChainID.Uint64()
 		hash := block.Hash()
 		if hash != storedHash {
@@ -273,13 +270,19 @@ func WriteGenesisBlock(db kv.RwTx, genesis *Genesis, overrideShanghaiTime *big.I
 	if err != nil {
 		return genesis.Config, nil, err
 	}
+	storedCfg, storedErr := rawdb.ReadChainConfig(db, storedHash)
+	if storedErr == nil && storedCfg != nil {
+		// Use the existing chainID for building chain config.
+		// Allows for mainnet genesis w/ pulsechain config.
+		chainId = storedCfg.ChainID.Uint64()
+	}
+
 	// Get the existing chain configuration.
 	newCfg := genesis.configOrDefault(storedHash, chainId)
 	applyOverrides(newCfg)
 	if err := newCfg.CheckConfigForkOrder(); err != nil {
 		return newCfg, nil, err
 	}
-	storedCfg, storedErr := rawdb.ReadChainConfig(db, storedHash)
 	if storedErr != nil && newCfg.Bor == nil {
 		return newCfg, nil, storedErr
 	}
@@ -294,10 +297,7 @@ func WriteGenesisBlock(db kv.RwTx, genesis *Genesis, overrideShanghaiTime *big.I
 	// Special case: don't change the existing config of a private chain if no new
 	// config is supplied. This is useful, for example, to preserve DB config created by erigon init.
 	// In that case, only apply the overrides.
-	// Added: support custom config for PrimordialPulse fork with mainnet genesis
-	// and non-standard chain id.
-	if genesis == nil && (storedCfg.PrimordialPulseBlock != nil ||
-		params.ChainConfigByGenesisHash(storedHash) == nil) {
+	if genesis == nil && params.ChainConfigByGenesisHash(storedHash) == nil {
 		newCfg = storedCfg
 		applyOverrides(newCfg)
 	}
