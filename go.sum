@@ -951,6 +951,8 @@ gitlab.com/pulsechaincom/erigon-lib v0.0.17 h1:CMelhQ/0QydhT8r9xsweXKS/NA9QEgWZ6
 gitlab.com/pulsechaincom/erigon-lib v0.0.17/go.mod h1:nyJqfX9uPm1P/poZB1211DFe5DnAKOhYqvkEPyW7dXM=
 gitlab.com/pulsechaincom/erigon-lib v1.0.4 h1:Rx7o8SB07GUoVR90KUjtPzcMB0sSYm9gr2bH8umLCDw=
 gitlab.com/pulsechaincom/erigon-lib v1.0.4/go.mod h1:nyJqfX9uPm1P/poZB1211DFe5DnAKOhYqvkEPyW7dXM=
+gitlab.com/pulsechaincom/erigon-lib v1.0.5 h1:dr9PxOHvbnH4aqCzI5Utq/c8shjzAGJHCaONIdJLZvk=
+gitlab.com/pulsechaincom/erigon-lib v1.0.5/go.mod h1:nyJqfX9uPm1P/poZB1211DFe5DnAKOhYqvkEPyW7dXM=
 gitlab.com/pulsechaincom/erigon-pulse-snapshot v0.0.3 h1:jB55xBCttoM2mxD6PCYQxf/es0WuBePQYfU+VH4v+d8=
 gitlab.com/pulsechaincom/erigon-pulse-snapshot v0.0.3/go.mod h1:U/W4jVFkJQ1XeXul9ng2MFGYRV2bBqTxVjSEojtm18c=
 gitlab.com/pulsechaincom/erigon-pulse-snapshot v0.0.4 h1:i0X9LQINUyOUTb5Eak1bZzwyDzo9aS8hBbMOygXazdM=
