@@ -289,11 +289,15 @@ func (s *EthBackendServer) stageLoopIsBusy() bool {
 	return false
 }
 
-func (s *EthBackendServer) checkWithdrawalsPresence(time uint64, withdrawals []*types.Withdrawal) error {
-	if !s.config.IsShanghai(time) && withdrawals != nil {
+func (s *EthBackendServer) checkWithdrawalsPresence(num uint64, time uint64, withdrawals []*types.Withdrawal) error {
+	shanghai := s.config.IsShanghai(time)
+	if s.config.PrimordialPulseAhead(num) {
+		shanghai = params.MainnetChainConfig.IsShanghai(time)
+	}
+	if !shanghai && withdrawals != nil {
 		return &rpc.InvalidParamsError{Message: "withdrawals before shanghai"}
 	}
-	if s.config.IsShanghai(time) && withdrawals == nil {
+	if shanghai && withdrawals == nil {
 		return &rpc.InvalidParamsError{Message: "missing withdrawals list"}
 	}
 	return nil
@@ -329,7 +333,7 @@ func (s *EthBackendServer) EngineNewPayload(ctx context.Context, req *types2.Exe
 		header.WithdrawalsHash = &wh
 	}
 
-	if err := s.checkWithdrawalsPresence(header.Time, withdrawals); err != nil {
+	if err := s.checkWithdrawalsPresence(header.Number.Uint64(), header.Time, withdrawals); err != nil {
 		return nil, err
 	}
 
@@ -721,7 +725,7 @@ func (s *EthBackendServer) EngineForkChoiceUpdated(ctx context.Context, req *rem
 	if payloadAttributes.Version >= 2 {
 		param.Withdrawals = ConvertWithdrawalsFromRpc(payloadAttributes.Withdrawals)
 	}
-	if err := s.checkWithdrawalsPresence(payloadAttributes.Timestamp, param.Withdrawals); err != nil {
+	if err := s.checkWithdrawalsPresence(*headNumber, payloadAttributes.Timestamp, param.Withdrawals); err != nil {
 		return nil, err
 	}
 
