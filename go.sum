@@ -790,6 +790,8 @@ github.com/yuin/goldmark v1.3.5/go.mod h1:mwnBkeHKe2W/ZEtQ+71ViKU8L12m81fl3OWwC1
 github.com/yuin/goldmark v1.4.13/go.mod h1:6yULJ656Px+3vBD8DxQVa3kxgyrAnzto9xy5taEt/CY=
 github.com/yusufpapurcu/wmi v1.2.2 h1:KBNDSne4vP5mbSWnJbO+51IMOXJB67QiYCSBrubbPRg=
 github.com/yusufpapurcu/wmi v1.2.2/go.mod h1:SBZ9tNy3G9/m5Oi98Zks0QjeHVDvuK0qfxQmPyzfmi0=
+gitlab.com/pulsechaincom/erigon-lib v1.0.6 h1:uNT2Vq3dyyrKX1nk2preWTRue016EyoyTdCly+pIAjE=
+gitlab.com/pulsechaincom/erigon-lib v1.0.6/go.mod h1:iz1daifnfSn3P0Iwd21ioyjwdmFEOn8DKeynahoHeSc=
 gitlab.com/pulsechaincom/erigon-pulse-snapshot v0.0.3 h1:jB55xBCttoM2mxD6PCYQxf/es0WuBePQYfU+VH4v+d8=
 gitlab.com/pulsechaincom/erigon-pulse-snapshot v0.0.3/go.mod h1:U/W4jVFkJQ1XeXul9ng2MFGYRV2bBqTxVjSEojtm18c=
 gitlab.com/pulsechaincom/erigon-pulse-snapshot v0.0.4 h1:i0X9LQINUyOUTb5Eak1bZzwyDzo9aS8hBbMOygXazdM=
